@@ -1,0 +1,38 @@
+{
+    "Cytoskeletal Contractility": [
+        "ACTB",
+        "TPM1",
+        "TPM2",
+        "MYL6",
+        "MYL12B"
+    ],
+    "Keratin Regulation": [
+        "KRT7",
+        "KRT18",
+        "KRT80",
+        "KRT81"
+    ],
+    "Microtubulal Regulation": [
+        "TUBA1A",
+        "TUBA1B",
+        "TUBA4A",
+        "TUBB",
+        "CCT2",
+        "CCT3"
+    ],
+    "Inflammation Signaling": [
+        "CXCL1",
+        "CXCL2",
+        "CXCL3",
+        "CXCL5",
+        "CXCL8",
+        "CCL2",
+        "IL32"
+    ],
+    "Proteasome Signaling": [
+        "PSMB8",
+        "PSME1",
+        "PSME2",
+        "PSMA3"
+    ]
+}
