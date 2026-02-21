@@ -1,0 +1,33 @@
+{
+    "Cytoskeletal Contractility": [
+        "ACTB",
+        "MYL6",
+        "MYL12A",
+        "MYL12B",
+        "TPM1",
+        "TPM2"
+    ],
+    "Keratin Regulation": [
+        "KRT8",
+        "KRT18",
+        "KRT19",
+        "KRT81"
+    ],
+    "Microtubulal Regulation": [
+        "TUBA1B"
+    ],
+    "Calcium Signaling": [
+        "KCNMA1",
+        "PPP3CA",
+        "S100A10",
+        "S100A11",
+        "S100A16",
+        "SLN",
+        "TMBIM6"
+    ],
+    "Integrin Adhesion": [
+        "ITGA2",
+        "ITGA3",
+        "ITGA5"
+    ]
+}
