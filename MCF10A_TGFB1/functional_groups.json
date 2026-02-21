@@ -1,0 +1,86 @@
+{
+    "The Laminin-332 & Collagen IV Complex": [
+        "LAMA3",
+        "LAMB3",
+        "LAMC2",
+        "FN1",
+        "COL4A1",
+        "COL4A2"
+    ],
+    "Mechanosensing & Adhesion": [
+        "PIEZO1",
+        "ITGB6",
+        "ITGB5",
+        "CLDN1",
+        "CLDN7",
+        "GJA5"
+    ],
+    "Fibrosis": [
+        "FAP",
+        "PXDN",
+        "MFAP5",
+        "TGFBI",
+        "SERPINE1",
+        "TIMP1"
+    ],
+    "Actin Driven Migration": [
+        "ACTB",
+        "FLNA",
+        "TAGLN",
+        "S100A11",
+        "TUBA1A",
+        "TUBA4A"
+    ],
+    "Keratin Regulation for Proliferation": [
+        "KRT14",
+        "KRT17",
+        "KRT81",
+        "KRT8",
+        "KRT15"
+    ],
+    "Adhesive Junctions": [
+        "CDH1",
+        "CDH2",
+        "CLDN1",
+        "CLDN7",
+        "TACSTD2",
+        "TSPAN1"
+    ],
+    "GTPase Driven Migration": [
+        "RHOV",
+        "RAP2B",
+        "CLMN",
+        "LMO7"
+    ],
+    "Enhanced Cell Proliferation": [
+        "GADD45B",
+        "ZFP36",
+        "ATF3",
+        "FOS",
+        "RRBP1",
+        "BCL2L11"
+    ],
+    "Retinoic Acid Biosynthesis & Signaling": [
+        "RDH10",
+        "ALDH1A3",
+        "TFAP2A",
+        "ALDH3A1"
+    ],
+    "Metabolic Regulation": [
+        "LDLR",
+        "SLC44A2",
+        "SLC3A2",
+        "AKB",
+        "ATP13A4",
+        "GLUL"
+    ],
+    "Epithelial Differentiation Drivers": [
+        "STI4",
+        "TGM1",
+        "TGM2",
+        "TFAP2A",
+        "ELF3",
+        "FGFR3",
+        "GRHL2"
+    ]
+}
