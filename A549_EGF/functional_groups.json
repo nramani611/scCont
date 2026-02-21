@@ -1,0 +1,38 @@
+{
+    "Cytoskeletal Contractility": [
+        "ACTB",
+        "MYL6",
+        "ARPC3",
+        "PDLIM7"
+    ],
+    "Keratin Regulation": [
+        "KRT8",
+        "KRT18",
+        "KRT7",
+        "KRT81"
+    ],
+    "Microtubulal Regulation": [
+        "CCT4",
+        "CCT5",
+        "CCT7",
+        "TUBA1B",
+        "TUBA1C",
+        "TUBB4B"
+    ],
+    "Calcium Signaling": [
+        "ANXA2",
+        "ANXA5",
+        "S100A6",
+        "S100A10",
+        "S100A11",
+        "S100A13",
+        "S100A16"
+    ],
+    "Cell Cycle Proliferation": [
+        "CCNB1",
+        "CCNB2",
+        "CCND1",
+        "NUF2",
+        "HMMR"
+    ]
+}
