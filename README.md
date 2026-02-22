@@ -18,19 +18,23 @@ cd scCont
 pip install -r requirements.txt
 ```
 
-## Overview of the Repository 
+This repository contains a step-by-step Jupyter Notebook tutorial designed to walk you through the five-stage pipeline and provide guidance on applying scCont to your own scRNA-seq data. To reproduce the core findings and figures from our manuscript, run the scCont pipeline Jupyter Notebook.
 
-The `scCont` pipeline jupyter notebook in this repository is designed to walk through the code for each of the five steps and offers guidance on how to apply this pipeline to the reader's own scRNA data. The current cells in the notebook outline the code used to generate the figures seen for Figures 2 and 3 in the paper. There are 13 folders in this repository - one for each dataset with the following files:
+## Repository Structure & Data
 
-These files are in the MCF10A_TGFB1 and all the A549 folders. These were generated and used to make the figures seen in Figures 3 and 4:
-* functional_groups.json: Dictionary mapping functional group names to genes involved
-* group_to_latent.json: Dictionary mapping functional group name to the latent feature number it came from
-* invert_shap.json: Dictionary mapping latent to boolean to see if latent values need to be inverted to properly make time and latent features positively correlated (this is purely done to make it so all latent features are positively correleted with time)
-* latent_to_bifurcation.json: Dictionary mapping latent to boolean to see if it was identified as a bifurcating latent (this was only done for the MCF10A_TGFB1 dataset)
+There are 13 folders in this repository - one for each dataset banchmarked in the study. Due to GitHub file size limits, all of the `.gz` datasets are hosted externally. All full datasets used to train scCont are available via this [Google Drive link](https://drive.google.com/drive/folders/1sqRm1o5t8Tizw4sQfJXdQ-blWzii3jVh?usp=sharing).
 
 The following files are available for all datasets:
-* .gz file: Dataset used to train scCont (note some of the files were too big for GitHub - all datasets used are available on the [Google Drive link](https://drive.google.com/drive/folders/1sqRm1o5t8Tizw4sQfJXdQ-blWzii3jVh?usp=sharing))
-* GO_Enrichment_Results.xlsx: GO enrichment results from each cluster. Enrichment was done after Figure 1C. Each sheet corresponds to a different cluster
-* encoder.pth: Saved weights of the encoder function after training
+* `.gz` file: The processed dataset used to train scCont.
+* `GO_Enrichment_Results.xlsx`: GO enrichment results from each cluster (calculated post-Stage 3). Each sheet corresponds to a different spatial cluster.
+* `encoder.pth`: The saved PyTorch weights of the encoder function after training.
 
-If you have any questions, please feel free to create an issue on this repository or email the correpsonding author, Neal Kewalramani, at nramani@bu.edu.
+Specific Dataset Annotations
+The `MCF10A_TGFB1` folder and all `A549` dataset folders contain additional metadata used to generate manuscript figures:
+* `functional_groups.json`: Dictionary mapping functional group names to the specific genes involved.
+* `group_to_latent.json`: Dictionary mapping functional group names to their source latent feature index.
+* `invert_shap.json`: Dictionary mapping latent features to a boolean indiciating if SHAP values were inverted to establish a positive correlation with experimental time.
+* `latent_to_bifurcation.json`: Dictionary mapping latent features to a boolean indicating if it was identified as a bifurcating trajectory _(Note: This analysis is specific to the MCF10A_TGFB1 dataset)._
+
+## Contact
+If you have any questions, encounter issues, or help adapting `scCont` for your own data, please open an issue on this repository or contact the correpsonding author, Neal Kewalramani, at nramani@bu.edu.
