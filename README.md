@@ -13,7 +13,7 @@ The framework operates in five stages to extract interpretable latent features (
 To run `scCont`, clone this repository, and install the required dependencies. We highly recommend making a new python virtual environment for installing dependencies:
 
 ```bash
-git clone [https://github.com/nramani611/scCont.git](https://github.com/YOUR_USERNAME/scCont.git)
+git clone https://github.com/nramani611/scCont.git
 cd scCont
 pip install -r requirements.txt
 ```
