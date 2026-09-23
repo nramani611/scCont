@@ -100,6 +100,14 @@ package API, then reproduces the latent-level analysis and manuscript figures (f
 heatmaps and multi-latent trajectory plots). Run it with the `cont-learn` kernel or any environment
 where `sccont[all]` and `jupyter` are installed.
 
+## Simulated data (SERGIO)
+
+The simulation benchmark in the manuscript uses [SERGIO](https://github.com/PayamDiba/SERGIO)
+with explicit ground-truth gene programs. `simulation/` contains the exact scripts and per-run
+parameter files used to generate every simulated dataset, plus a normalisation step that matches
+the real-data pipeline. See [`simulation/README.md`](simulation/README.md) for setup and the
+command that reproduces each dataset.
+
 ## Repository Structure & Data
 
 There are 13 folders in this repository - one for each dataset benchmarked in the study. Due to GitHub file size limits, some of the `.gz` datasets are hosted externally. All full datasets used to train scCont are available via this [Google Drive link](https://drive.google.com/drive/folders/1sqRm1o5t8Tizw4sQfJXdQ-blWzii3jVh?usp=sharing).
