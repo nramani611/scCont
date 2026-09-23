@@ -121,8 +121,42 @@ The full list of switches (`min_genes`, `max_genes`, `max_pct_mito`, `min_cells`
 | C | `elbow_plot_for_clusters`, `group_spatially_similar_latents`, `latents_in_group` | Cluster latent features by spatial pattern (stored in `adata.uns`) |
 | D | `compute_shap_values`, `select_top_genes_by_zscore`, `top_genes_per_latent` | Gene -> latent attributions (summary in `adata.varm`) |
 | E | `enrich_latent_clusters`, `run_go_enrichment`, `write_go_results_excel`, `collect_enriched_genes` | GO enrichment |
+| — | `pl.*` | Plotting from the stored results (see below) |
 
 Every function has a docstring; `help(sccont.preprocess)` lists all QC parameters.
+
+## Plotting
+
+`sccont.pl` draws from the results stored on the `AnnData` and colours by any `obs` column.
+Every function accepts `ax=`, `show=` and `save=` and returns the matplotlib axes.
+
+```python
+pl = sccont.pl
+pl.training_loss(losses)
+pl.latent_embedding(adata, color="timepoint")            # any obs column, or a latent index: color=7
+pl.latent_grid(adata)                                     # every latent's activation, ordered by spatial group
+pl.latent_distance_heatmap(adata)                         # the matrix behind the spatial grouping
+pl.latent_by_label(adata, 7, "condition", kind="violin")
+pl.latent_label_association(adata, "timepoint")          # which latents track a label (heatmap / correlations)
+pl.top_genes(adata, latent=7, shap_values=shap_values)   # mean |SHAP| bars, coloured by direction
+pl.go_enrichment(go_results)                              # dot plot per spatial cluster
+```
+
+Manuscript-style figures, generalised to any ordered label:
+
+```python
+pl.group_trajectories(adata, groupby="timepoint", split_after="T2")           # Figure 2
+pl.gene_set_shap_embedding(adata, shap_values, genes, latent=7)
+pl.shap_beeswarm(adata, shap_values, latent=7)
+pl.assign_branches(adata, shap_values, latent=7, genes=genes)                 # -> obs["sccont_branch"]
+pl.functional_group_heatmap(adata, shap_values, functional_groups, group_to_latent,
+                            groupby="timepoint", branch_key="sccont_branch")  # linear or bifurcating layout
+pl.latent_trajectory(adata, shap_values, gene_sets, latents=[0, 5], groupby="timepoint")
+```
+
+Colour conventions: distinct labels use a fixed eight-colour palette, ordered labels and magnitudes a
+single blue ramp, and signed quantities (latent activation, z-scores, SHAP sums) a blue-grey-red scale
+centred on zero.
 
 ## Tutorial notebook
 

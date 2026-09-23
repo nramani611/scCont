@@ -57,9 +57,11 @@ from .training import (
     train_contrastive,
 )
 from .utils import get_device, set_seeds
+from . import plotting as pl
 
 __all__ = [
     "__version__",
+    "pl",
     # utils
     "set_seeds",
     "get_device",
