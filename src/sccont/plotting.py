@@ -520,14 +520,13 @@ def latent_label_association(
 
 
 def _direction_colors(adata, shap_values, latent, gene_idx):
-    """Sign of corr(expression, SHAP) per gene -> colour and label."""
-    X = adata.X.toarray() if hasattr(adata.X, "toarray") else np.asarray(adata.X)
-    colors, signs = [], []
-    for g in gene_idx:
-        r = pearsonr(X[:, g], shap_values[:, g, latent])[0] if np.std(X[:, g]) > 0 else 0.0
-        signs.append(r)
-        colors.append(CATEGORICAL[0] if r >= 0 else CATEGORICAL[1])
-    return colors, np.array(signs)
+    """Direction of each gene (sccont.annotate.gene_directions) -> colour and correlation."""
+    from .annotate import gene_directions
+
+    genes = [adata.var_names[g] for g in gene_idx]
+    df = gene_directions(adata, shap_values, latent, genes).set_index("Gene")
+    colors = [CATEGORICAL[0] if df.loc[g, "Direction"] == "positive" else CATEGORICAL[1] for g in genes]
+    return colors, df.loc[genes, "Correlation_to_SHAP"].to_numpy()
 
 
 def top_genes(

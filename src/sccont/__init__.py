@@ -8,6 +8,7 @@ B. :func:`train_contrastive`, :func:`embed` – InfoNCE training; latents -> ``a
 C. :func:`group_spatially_similar_latents`  – spatial clustering of latent features
 D. :func:`compute_shap_values`              – network attribution (SHAP); summary -> ``adata.varm``
 E. :func:`enrich_latent_clusters`           – GO enrichment of latent clusters
+E. :func:`latent_report`, :func:`annotate_latents` – per-latent driver report; optional Claude-assisted functional groups
 """
 
 from importlib.metadata import PackageNotFoundError, version
@@ -17,6 +18,14 @@ try:
 except PackageNotFoundError:  # pragma: no cover - source checkout without install
     __version__ = "0.0.0"
 
+from .annotate import (
+    AnnotationResult,
+    LatentReport,
+    annotate_latent,
+    annotate_latents,
+    gene_directions,
+    latent_report,
+)
 from .annotation import (
     cluster_gene_sets,
     collect_enriched_genes,
@@ -98,10 +107,17 @@ __all__ = [
     "SHAP_VARM_KEY",
     "select_top_genes_by_zscore",
     "top_genes_per_latent",
-    # annotation
+    # annotation (cluster level)
     "run_go_enrichment",
     "cluster_gene_sets",
     "enrich_latent_clusters",
     "write_go_results_excel",
     "collect_enriched_genes",
+    # annotation (latent level, optional LLM)
+    "gene_directions",
+    "latent_report",
+    "annotate_latent",
+    "annotate_latents",
+    "LatentReport",
+    "AnnotationResult",
 ]
