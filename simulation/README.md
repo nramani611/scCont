@@ -131,15 +131,17 @@ import sccont
 
 run = "runs/simulated_data_dyn_bifurc/prepped"
 expr = pd.read_csv(f"{run}/expression_matrix_normalized.csv", index_col=0)   # genes x cells
-meta = pd.read_csv(f"{run}/cell_metadata.csv", index_col=0).loc[expr.columns]
-labels = meta["bin"].astype(str)          # or meta["pseudotime"] in dynamics runs
+meta = pd.read_csv(f"{run}/cell_metadata.csv", index_col=0)                 # cell_type, bin, pseudotime, branch
+adata = sccont.to_anndata(expr, obs=meta)   # labels live in adata.obs; training never uses them
 
-dataset = sccont.TemporalSingleCellDataset(expr.to_numpy(), labels)
-pairs = sccont.get_knn_pairs(dataset, k=3)
-encoder, projector, losses = sccont.train_contrastive(dataset, pairs, latent_dim=32)
-adata_latent = sccont.embed(encoder, dataset)
-shap_values = sccont.compute_shap_values(encoder, expr.to_numpy().T)
+pairs = sccont.get_knn_pairs(adata, k=3)
+encoder, projector, losses = sccont.train_contrastive(adata, pairs, latent_dim=32)
+sccont.embed(encoder, adata)                 # -> adata.obsm["X_sccont"]
+shap_values = sccont.compute_shap_values(encoder, adata)   # summary -> adata.varm
 
-# Score attributions against the ground truth
-gt = pd.read_csv(f"{run}/gt_membership_signed.csv", index_col=0).loc[expr.index]
+# Score attributions against the ground truth (aligned to adata.var_names)
+gt = pd.read_csv(f"{run}/gt_membership_signed.csv", index_col=0).loc[adata.var_names]
 ```
+
+Alternatively `prepped.h5ad` can be read directly with `anndata.read_h5ad`; it already carries the
+same `obs` columns plus `varm["gt_membership_signed"]` and `obsm["gt_activity"]`.

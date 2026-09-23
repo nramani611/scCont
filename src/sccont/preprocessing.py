@@ -1,4 +1,4 @@
-"""Loading and normalising time-course scRNA-seq count matrices."""
+"""Loading and normalising scRNA-seq count matrices into ``AnnData``."""
 
 from __future__ import annotations
 
@@ -9,6 +9,8 @@ import anndata as ad
 import numpy as np
 import pandas as pd
 import scanpy as sc
+
+from .data import _dense
 
 # Cell-cycle marker lists (Tirosh et al. 2016) used for S / G2M scoring.
 S_GENES = [
@@ -40,6 +42,7 @@ def load_expression_matrix(
 
     Works for the GSE147405 ``*_TimeCourse.tsv.gz`` and GSE200981 files shipped
     with the repository. Any extra keyword arguments go to :func:`pandas.read_csv`.
+    Convert the result with :func:`to_anndata`.
     """
     df = pd.read_csv(path, sep=sep, **read_csv_kwargs)
     if gene_col in df.columns:
@@ -50,16 +53,64 @@ def load_expression_matrix(
 
 
 def timepoints_from_columns(columns: Sequence[str], sep: str = "_", index: int = 1) -> list[str]:
-    """Extract timepoint labels from cell names such as ``V12_T3`` -> ``'T3'``."""
+    """Extract labels from cell names such as ``V12_T3`` -> ``'T3'``.
+
+    Only a convenience for the naming convention of the datasets in this
+    repository; any per-cell label can instead be placed in ``adata.obs``.
+    """
     return [str(c).split(sep)[index] for c in columns]
 
 
-def _dense(X) -> np.ndarray:
-    return X.toarray() if hasattr(X, "toarray") else np.asarray(X)
+def to_anndata(
+    counts: pd.DataFrame,
+    obs: pd.DataFrame | None = None,
+    cells_by_genes: bool = False,
+    **obs_columns,
+) -> ad.AnnData:
+    """Convert an expression table to an ``AnnData`` (cells x genes).
+
+    Parameters
+    ----------
+    counts
+        Genes x cells DataFrame (index = genes, columns = cells) as produced by
+        :func:`load_expression_matrix`. Pass ``cells_by_genes=True`` if it is
+        already cells x genes.
+    obs
+        Optional per-cell annotation table indexed by cell name; aligned to the
+        cells in ``counts`` (extra rows dropped, missing cells raise).
+    **obs_columns
+        Extra per-cell labels given as ``name=sequence`` (length ``n_cells``),
+        e.g. ``timepoint=[...]``, ``condition=[...]``.
+
+    Returns
+    -------
+    AnnData
+        Labels are in ``adata.obs``; scCont never uses them for training.
+    """
+    df = counts if cells_by_genes else counts.T
+    adata = ad.AnnData(np.asarray(df.to_numpy(), dtype=np.float32))
+    adata.obs_names = df.index.astype(str)
+    adata.var_names = df.columns.astype(str)
+    adata.var_names_make_unique()
+
+    if obs is not None:
+        missing = adata.obs_names.difference(obs.index.astype(str))
+        if len(missing):
+            raise ValueError(f"{len(missing)} cells missing from obs, e.g. {list(missing[:3])}")
+        aligned = obs.copy()
+        aligned.index = aligned.index.astype(str)
+        for col in aligned.columns:
+            adata.obs[col] = aligned.loc[adata.obs_names, col].to_numpy()
+    for name, values in obs_columns.items():
+        values = np.asarray(values)
+        if len(values) != adata.n_obs:
+            raise ValueError(f"obs column '{name}' has {len(values)} values for {adata.n_obs} cells")
+        adata.obs[name] = values
+    return adata
 
 
 def preprocess(
-    counts: pd.DataFrame,
+    data: ad.AnnData | pd.DataFrame,
     *,
     min_genes: int = 200,
     max_genes: int | None = 6000,
@@ -77,8 +128,8 @@ def preprocess(
     max_value: float | None = 10.0,
     plot_qc: bool = False,
     verbose: bool = True,
-    return_anndata: bool = False,
-) -> pd.DataFrame | ad.AnnData:
+    as_dataframe: bool = False,
+) -> ad.AnnData | pd.DataFrame:
     """QC-filter, normalise, select HVGs, regress covariates and scale a count matrix.
 
     Every step has its own switch; the defaults reproduce the notebook's
@@ -89,8 +140,9 @@ def preprocess(
 
     Parameters
     ----------
-    counts
-        Raw counts, genes x cells (as returned by :func:`load_expression_matrix`).
+    data
+        ``AnnData`` of raw counts (cells x genes; any ``obs`` labels are kept), or
+        a genes x cells DataFrame (converted with :func:`to_anndata`).
     min_genes, max_genes
         Keep cells with ``min_genes <= n_genes < max_genes``. ``0``/``None`` disables the bound.
     max_pct_mito
@@ -112,14 +164,22 @@ def preprocess(
         Z-score genes with ``scanpy.pp.scale``, clipping at ``max_value`` (``None`` = no clip).
     plot_qc
         Show the scanpy QC violin plot and the Scrublet histogram.
-    return_anndata
-        Return the processed ``AnnData`` (cells x genes) instead of a DataFrame.
+    verbose
+        Print cell/gene counts after each filtering step.
+    as_dataframe
+        Return a genes x cells DataFrame instead of the ``AnnData`` (legacy).
 
     Returns
     -------
-    DataFrame (genes x cells) of scaled expression, or AnnData if ``return_anndata``.
+    AnnData (cells x genes) with QC metrics added to ``obs``
+    (``n_genes``, ``n_counts``, ``percent_mito``, ``doublet_score``, ``S_score``, ...),
+    or a genes x cells DataFrame if ``as_dataframe``.
     """
-    adata = ad.AnnData(counts.T.astype(np.float32))  # cells x genes
+    if isinstance(data, ad.AnnData):
+        adata = data.copy()
+        adata.X = np.asarray(_dense(adata.X), dtype=np.float32)
+    else:
+        adata = to_anndata(data)
     adata.var_names_make_unique()
 
     X = adata.X
@@ -191,6 +251,6 @@ def preprocess(
     if verbose:
         print(f"Final AnnData shape: {adata.shape} (cells x genes)")
 
-    if return_anndata:
-        return adata
-    return pd.DataFrame(_dense(adata.X).T, index=adata.var_names, columns=adata.obs_names)
+    if as_dataframe:
+        return pd.DataFrame(_dense(adata.X).T, index=adata.var_names, columns=adata.obs_names)
+    return adata

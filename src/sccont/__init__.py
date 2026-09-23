@@ -1,11 +1,12 @@
 """scCont: unsupervised contrastive learning of interpretable latent features from scRNA-seq.
 
-Pipeline
---------
+The pipeline works on an ``AnnData`` (cells x genes). Any per-cell labels live in
+``adata.obs`` and are carried through untouched; training is unsupervised.
+
 A. :func:`get_knn_pairs`                    – kNN positive-pair selection
-B. :func:`train_contrastive`, :func:`embed` – InfoNCE training, latent embedding
+B. :func:`train_contrastive`, :func:`embed` – InfoNCE training; latents -> ``adata.obsm['X_sccont']``
 C. :func:`group_spatially_similar_latents`  – spatial clustering of latent features
-D. :func:`compute_shap_values`              – network attribution (SHAP)
+D. :func:`compute_shap_values`              – network attribution (SHAP); summary -> ``adata.varm``
 E. :func:`enrich_latent_clusters`           – GO enrichment of latent clusters
 """
 
@@ -24,11 +25,12 @@ from .annotation import (
     write_go_results_excel,
 )
 from .attribution import (
+    SHAP_VARM_KEY,
     compute_shap_values,
     select_top_genes_by_zscore,
     top_genes_per_latent,
 )
-from .data import TemporalSingleCellDataset
+from .data import SingleCellDataset, TemporalSingleCellDataset, as_dataset
 from .losses import InfoNCELoss
 from .models import Encoder, Projector
 from .pairs import get_knn_pairs, get_knn_pairs_agnostic
@@ -38,6 +40,7 @@ from .preprocessing import (
     load_expression_matrix,
     preprocess,
     timepoints_from_columns,
+    to_anndata,
 )
 from .spatial import (
     elbow_plot_for_clusters,
@@ -45,7 +48,14 @@ from .spatial import (
     latents_in_group,
     spatial_map,
 )
-from .training import embed, load_encoder, save_encoder, train_contrastive
+from .training import (
+    LATENT_KEY,
+    embed,
+    latent_anndata,
+    load_encoder,
+    save_encoder,
+    train_contrastive,
+)
 from .utils import get_device, set_seeds
 
 __all__ = [
@@ -53,14 +63,17 @@ __all__ = [
     # utils
     "set_seeds",
     "get_device",
-    # preprocessing
+    # preprocessing / input
     "load_expression_matrix",
+    "to_anndata",
     "preprocess",
     "timepoints_from_columns",
     "S_GENES",
     "G2M_GENES",
     # data / pairs
+    "SingleCellDataset",
     "TemporalSingleCellDataset",
+    "as_dataset",
     "get_knn_pairs",
     "get_knn_pairs_agnostic",
     # models / training
@@ -69,6 +82,8 @@ __all__ = [
     "InfoNCELoss",
     "train_contrastive",
     "embed",
+    "latent_anndata",
+    "LATENT_KEY",
     "save_encoder",
     "load_encoder",
     # spatial
@@ -78,6 +93,7 @@ __all__ = [
     "latents_in_group",
     # attribution
     "compute_shap_values",
+    "SHAP_VARM_KEY",
     "select_top_genes_by_zscore",
     "top_genes_per_latent",
     # annotation
