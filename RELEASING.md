@@ -15,7 +15,7 @@
 ## Cutting a release
 
 1. Bump `version` in `pyproject.toml` (e.g. `0.1.0` → `0.1.1`) and commit.
-2. Run the tests locally: `pip install -e ".[all,dev]" && pytest`.
+2. Run the tests locally: `pip install -e ".[dev]" && pytest`.
 3. Tag and push: `git tag v0.1.1 && git push origin main --tags`.
 4. On GitHub, **Releases → Draft a new release**, pick the tag, write notes, **Publish release**.
    The `Publish to PyPI` workflow builds the sdist + wheel and uploads them.

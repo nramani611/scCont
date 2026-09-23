@@ -66,11 +66,14 @@ def preprocess(
     max_pct_mito: float | None = 10.0,
     min_cells: int = 3,
     remove_doublets: bool = True,
+    normalize_total: bool = True,
     target_sum: float = 1e4,
+    log1p: bool = True,
     n_top_genes: int | None = 3000,
     regress_mito: bool = True,
     regress_counts: bool = True,
     regress_cell_cycle: bool = True,
+    scale: bool = True,
     max_value: float | None = 10.0,
     plot_qc: bool = False,
     verbose: bool = True,
@@ -78,32 +81,35 @@ def preprocess(
 ) -> pd.DataFrame | ad.AnnData:
     """QC-filter, normalise, select HVGs, regress covariates and scale a count matrix.
 
-    This reproduces the notebook's ``normalize = True`` block. For simulated data
-    with no mitochondrial or cell-cycle signal use
-    ``remove_doublets=False, regress_mito=False, regress_cell_cycle=False,
-    max_pct_mito=None``.
+    Every step has its own switch; the defaults reproduce the notebook's
+    ``normalize = True`` block. Set a step's flag to ``False`` (or its threshold
+    to ``None``/``0``) to skip it. For simulated data with no mitochondrial or
+    cell-cycle signal use ``remove_doublets=False, regress_mito=False,
+    regress_cell_cycle=False, max_pct_mito=None``.
 
     Parameters
     ----------
     counts
         Raw counts, genes x cells (as returned by :func:`load_expression_matrix`).
     min_genes, max_genes
-        Keep cells with ``min_genes <= n_genes < max_genes``. ``None`` disables the bound.
+        Keep cells with ``min_genes <= n_genes < max_genes``. ``0``/``None`` disables the bound.
     max_pct_mito
         Drop cells with a higher percentage of ``MT-`` counts. ``None`` disables.
     min_cells
-        Keep genes detected in at least this many cells.
+        Keep genes detected in at least this many cells. ``0`` disables.
     remove_doublets
-        Run Scrublet and drop predicted doublets (needs ``pip install "sccont[preprocess]"``).
-    target_sum
-        ``scanpy.pp.normalize_total`` target.
+        Run Scrublet and drop predicted doublets.
+    normalize_total, target_sum
+        Library-size normalisation with ``scanpy.pp.normalize_total``.
+    log1p
+        Apply ``scanpy.pp.log1p``.
     n_top_genes
         Number of highly variable genes to keep (``flavor='seurat'``). ``None`` keeps all.
     regress_mito, regress_counts, regress_cell_cycle
         Covariates for ``scanpy.pp.regress_out`` (``percent_mito``, ``n_counts``,
-        ``S_score``/``G2M_score``).
-    max_value
-        Clip value for ``scanpy.pp.scale``.
+        ``S_score``/``G2M_score``). All ``False`` skips the regression.
+    scale, max_value
+        Z-score genes with ``scanpy.pp.scale``, clipping at ``max_value`` (``None`` = no clip).
     plot_qc
         Show the scanpy QC violin plot and the Scrublet histogram.
     return_anndata
@@ -144,13 +150,8 @@ def preprocess(
         print(f"Genes after filtering: {adata.n_vars}")
 
     if remove_doublets:
-        try:
-            import scrublet as scr
-        except ImportError as exc:  # pragma: no cover
-            raise ImportError(
-                "Doublet removal needs scrublet; install with `pip install \"sccont[preprocess]\"` "
-                "or pass remove_doublets=False"
-            ) from exc
+        import scrublet as scr
+
         scrub = scr.Scrublet(_dense(adata.X).copy())
         doublet_scores, predicted = scrub.scrub_doublets(verbose=verbose)
         if predicted is None:  # Scrublet could not find a threshold
@@ -166,8 +167,10 @@ def preprocess(
         if verbose:
             print(f"Cells after doublet removal: {adata.n_obs}")
 
-    sc.pp.normalize_total(adata, target_sum=target_sum)
-    sc.pp.log1p(adata)
+    if normalize_total:
+        sc.pp.normalize_total(adata, target_sum=target_sum)
+    if log1p:
+        sc.pp.log1p(adata)
 
     if n_top_genes is not None and n_top_genes < adata.n_vars:
         sc.pp.highly_variable_genes(adata, n_top_genes=n_top_genes, subset=True, flavor="seurat")
@@ -183,7 +186,8 @@ def preprocess(
     if regress:
         sc.pp.regress_out(adata, regress)
 
-    sc.pp.scale(adata, max_value=max_value)
+    if scale:
+        sc.pp.scale(adata, max_value=max_value)
     if verbose:
         print(f"Final AnnData shape: {adata.shape} (cells x genes)")
 

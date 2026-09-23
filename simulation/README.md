@@ -33,7 +33,7 @@ used in the scCont manuscript. Run everything from this directory.
 ## Setup
 
 ```bash
-pip install "sccont[all]"        # numpy, pandas, scipy, anndata, scanpy are all pulled in
+pip install sccont               # numpy, pandas, scipy, anndata, scanpy are all pulled in
 ```
 
 SERGIO has no working PyPI release (the `sergio` package on PyPI is unrelated). On first use

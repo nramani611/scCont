@@ -14,10 +14,10 @@ The framework operates in five stages to extract interpretable latent features (
 ## Installation
 
 ```bash
-pip install sccont            # core pipeline (stages A-D)
-pip install "sccont[all]"     # + Scrublet doublet removal and g:Profiler GO enrichment
+pip install sccont
 ```
 
+One install covers every stage, including preprocessing (Scrublet) and GO enrichment (g:Profiler).
 Requires Python 3.10+. `pip` installs a CPU build of PyTorch by default; for GPU training install
 torch first following <https://pytorch.org/get-started/locally/>, then install `sccont`.
 
@@ -26,7 +26,7 @@ To work from a source checkout instead:
 ```bash
 git clone https://github.com/nramani611/scCont.git
 cd scCont
-pip install -e ".[all,dev]"
+pip install -e ".[dev]"
 pytest
 ```
 
@@ -74,8 +74,22 @@ Reusing a trained encoder shipped in this repository:
 encoder = sccont.load_encoder("MCF7_TNF/encoder.pth", input_dim=expr.shape[0], latent_dim=32)
 ```
 
-For simulated data with no mitochondrial or cell-cycle signal, call
-`preprocess(counts, remove_doublets=False, regress_mito=False, regress_cell_cycle=False, max_pct_mito=None)`.
+Every preprocessing step has its own switch, so you can turn off the ones that do not apply to
+your data. For example, simulated data with no mitochondrial or cell-cycle signal:
+
+```python
+expr = sccont.preprocess(
+    counts,
+    remove_doublets=False,      # skip Scrublet
+    max_pct_mito=None,          # no mitochondrial filter
+    regress_mito=False,
+    regress_cell_cycle=False,
+)
+```
+
+The full list of switches (`min_genes`, `max_genes`, `max_pct_mito`, `min_cells`, `remove_doublets`,
+`normalize_total`, `log1p`, `n_top_genes`, `regress_mito`, `regress_counts`, `regress_cell_cycle`,
+`scale`) is documented in `help(sccont.preprocess)`.
 
 ## API overview
 
@@ -98,7 +112,7 @@ Every function has a docstring; `help(sccont.preprocess)` lists all QC parameter
 `scCont Pipeline.ipynb` walks through the five stages on the MCF10A TGFB1 dataset using the
 package API, then reproduces the latent-level analysis and manuscript figures (functional-group
 heatmaps and multi-latent trajectory plots). Run it with the `cont-learn` kernel or any environment
-where `sccont[all]` and `jupyter` are installed.
+where `sccont` and `jupyter` are installed.
 
 ## Simulated data (SERGIO)
 

@@ -34,12 +34,12 @@ dependencies = [
     "shap>=0.44",
     "matplotlib>=3.7",
     "tqdm>=4.60",
+    "scrublet>=0.2.3",
+    "gprofiler-official>=1.0",
+    "openpyxl>=3.1",
 ]
 
 [project.optional-dependencies]
-preprocess = ["scrublet>=0.2.3"]
-annotation = ["gprofiler-official>=1.0", "openpyxl>=3.1"]
-all = ["sccont[preprocess,annotation]"]
 dev = ["pytest>=7", "build", "twine"]
 
 [project.urls]

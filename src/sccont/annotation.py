@@ -19,16 +19,8 @@ def run_go_enrichment(
     organism: str = "hsapiens",
     sources: Sequence[str] = DEFAULT_GO_SOURCES,
 ) -> pd.DataFrame:
-    """Query g:Profiler (network call) for GO enrichment of ``genes`` against ``background``.
-
-    Requires the ``gprofiler-official`` package (``pip install "sccont[annotation]"``).
-    """
-    try:
-        from gprofiler import GProfiler
-    except ImportError as exc:  # pragma: no cover
-        raise ImportError(
-            "GO enrichment needs gprofiler-official; install with `pip install \"sccont[annotation]\"`"
-        ) from exc
+    """Query g:Profiler (network call) for GO enrichment of ``genes`` against ``background``."""
+    from gprofiler import GProfiler
 
     gp = GProfiler(return_dataframe=True)
     return gp.profile(
@@ -92,7 +84,7 @@ def enrich_latent_clusters(
 
 
 def write_go_results_excel(results: Sequence[pd.DataFrame], path: str | Path) -> Path:
-    """Write one sheet per cluster (``'Cluster 0'``, ``'Cluster 1'``, ...). Needs ``openpyxl``."""
+    """Write one sheet per cluster (``'Cluster 0'``, ``'Cluster 1'``, ...)."""
     path = Path(path)
     with pd.ExcelWriter(path, engine="openpyxl") as writer:
         for i, df in enumerate(results):

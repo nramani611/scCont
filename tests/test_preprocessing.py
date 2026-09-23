@@ -42,6 +42,28 @@ def test_preprocess_simulated_mode_returns_genes_by_cells():
     assert out.to_numpy().max() <= 10 + 1e-6
 
 
+def test_preprocess_all_steps_off_is_identity():
+    df = _toy_counts()
+    out = preprocess(
+        df,
+        min_genes=0,
+        max_genes=None,
+        max_pct_mito=None,
+        min_cells=0,
+        remove_doublets=False,
+        normalize_total=False,
+        log1p=False,
+        n_top_genes=None,
+        regress_mito=False,
+        regress_counts=False,
+        regress_cell_cycle=False,
+        scale=False,
+        verbose=False,
+    )
+    assert out.shape == df.shape
+    np.testing.assert_allclose(out.to_numpy(), df.to_numpy())
+
+
 def test_preprocess_return_anndata():
     df = _toy_counts()
     adata = preprocess(
