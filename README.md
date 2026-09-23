@@ -159,14 +159,19 @@ Colour conventions: distinct labels use a fixed eight-colour palette, ordered la
 single blue ramp, and signed quantities (latent activation, z-scores, SHAP sums) a blue-grey-red scale
 centred on zero.
 
-## Annotating latent features with an LLM
+## Optional: LLM-assisted functional-group annotation
 
-The functional groups shipped in this repository (`functional_groups.json`, `group_to_latent.json`)
-were produced by describing each latent feature to Claude, letting it propose literature-grounded
-gene groups, and then curating the result. We recommend the same workflow for new datasets, and
-the package supports it in two ways.
+Turning a latent feature's driver genes into named functional groups (pathways, processes, cell
+states) normally means a literature search. As a convenience, scCont can hand that step to a large
+language model. This is entirely optional; the core pipeline never calls an LLM.
 
-**No API key: build the description and paste it into any assistant.**
+**Important: LLMs can hallucinate.** A model may invent pathway memberships, misattribute a gene's
+function, or state a confident rationale with no support in the literature. Treat every proposed
+group as a hypothesis: check each gene's assignment against primary sources or curated databases
+(e.g. GO, Reactome, KEGG, UniProt) before using it in an analysis or publication. scCont only
+constrains the output to genes present in the report; it cannot verify the biology.
+
+**Option 1: build the description and paste it into the assistant of your choice.**
 
 ```python
 report = sccont.latent_report(adata, shap_values, latent=7, go_results=go_results,
@@ -175,7 +180,7 @@ print(report.to_prompt())      # positive/negative driver genes, label associati
 report.to_frame()              # the same drivers as a table
 ```
 
-**Automated: let Claude propose the groups directly.**
+**Option 2: query Claude directly from Python.**
 
 ```bash
 pip install "sccont[llm]"
@@ -186,16 +191,15 @@ export ANTHROPIC_API_KEY=...   # or `ant auth login`
 result = sccont.annotate_latents(adata, shap_values, latents=[0, 5, 6, 7],
                                  go_results=go_results, groupby="timepoint",
                                  invert_shap={7: True}, extra_context="MCF10A cells, TGF-beta1 time course")
-result.functional_groups       # {name: [genes]}  – same format as the repo's functional_groups.json
+result.functional_groups       # {name: [genes]}  – same format as functional_groups.json
 result.group_to_latent         # {name: latent}   – same format as group_to_latent.json
-result.table                   # group, latent, genes, direction, confidence, rationale
+result.table                   # group, latent, genes, direction, confidence, rationale – review this
 result.save("my_dataset/")     # writes the JSON files (+ annotations.csv) for the notebook and pl.functional_group_heatmap
 ```
 
-Each latent is one structured-output request to `claude-opus-5` (a few cents per latent). The
-model may only use genes from the report; anything else is discarded, and every group carries a
-rationale and a confidence rating. Treat the output as a hypothesis to review, not a final
-annotation. Pass `model=` to use a different Claude model and `client=` to supply your own
+Each latent is one structured-output request to `claude-opus-5` (a few cents per latent). Genes not
+in the report are discarded, and every group carries a rationale and a confidence rating to guide
+your review. Pass `model=` to use a different Claude model and `client=` to supply your own
 configured `anthropic.Anthropic` client.
 
 ## Tutorial notebook
